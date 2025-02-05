@@ -1,0 +1,42 @@
+name: Javascript Obfuscation
+
+on:
+  push:
+    branches:
+      - main # شاخه اصلی را مشخص کنید (مثلاً main یا master)
+  workflow_dispatch: # اجازه اجرای دستی Workflow
+
+jobs:
+  obfuscate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # گام 1: Checkout کد از رепو
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # گام 2: استفاده از Action مبهم‌سازی
+      - name: Obfuscate JavaScript Files
+        uses: KevinRohn/github-action-javascript-obfuscator@v1.1.0
+        with:
+          input_path: "./src" # مسیر ورودی فایل‌ها (پوشه src)
+          output_path: "./dist" # مسیر خروجی فایل‌ها (پوشه dist)
+          compact: true # فشرده کردن کد
+          control_flow_flattening: false # غیرفعال کردن تخت‌سازی جریان کنترل
+          dead_code_injection: false # غیرفعال کردن تزریق کد مرده
+          debug_protection: false # غیرفعال کردن محافظت Debug
+          disable_console_output: false # اجازه دادن به خروجی کنسول
+          domain_lock: [] # قفل دامنه‌ها (اجباری نیست)
+          exclude: [] # فایل‌های استثنا (اجباری نیست)
+          identifier_names_generator: "hexadecimal" # نوع نام‌گذاری شناسه‌ها
+          options_preset: "default" # تنظیمات پیشفرض
+          source_map: false # غیرفعال کردن sourcemap
+          string_array: true # فعال کردن آرایه رشته‌ها
+          target: "browser" # هدف: مرورگر
+
+      # گام 3: Upload فایل‌های مبهم‌شده به GitHub Releases
+      - name: Upload Obfuscated Files
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: dist/*.js # فایل‌های مبهم‌شده در پوشه dist
